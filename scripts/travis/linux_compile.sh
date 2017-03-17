@@ -7,6 +7,14 @@ set +e
 
 set -e
 
+if [ $CC == "gcc" ]; then
+	export CC=gcc-6;
+	export CXX=g++-6;
+else
+	export CC=clang-3.5;
+	export CXX=clang++-3.5;
+fi
+
 mkdir build
 cd build
 cmake -DCMAKE_BUILD_TYPE=Debug ..
