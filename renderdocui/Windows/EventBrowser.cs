@@ -886,10 +886,9 @@ namespace renderdocui.Windows
                 var desc = r.DescribeCounter(counters[0]);
 
                 m_Times = r.FetchCounters(counters);
-                bool somethingChanged = true;
-                while(somethingChanged)
+                int fetchAttemptsRemaining = 1;
+                while(fetchAttemptsRemaining-- > 0)  
                 {
-                    somethingChanged = false;
                     var lastTimes = r.FetchCounters(counters);
                     var memberValuesArray = m_Times.Values.ToArray();
                     for (int t = 0; t < m_Times.Values.Count; ++t)
@@ -900,7 +899,12 @@ namespace renderdocui.Windows
                             if (lastTimesArray[t][u].value.d < memberValuesArray[t][u].value.d)
                             {
                                 memberValuesArray[t][u].value.d = lastTimesArray[t][u].value.d;
-                                somethingChanged = true;
+
+                                // When something changes, we fetch at least two more times.
+                                // This means that we keep going until we get two frames in a row with now
+                                // improvements. This gives the best results without simply looping
+                                // forever.
+                                fetchAttemptsRemaining = 2;
                             }
                         }
                     }
