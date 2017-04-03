@@ -885,7 +885,26 @@ namespace renderdocui.Windows
 
                 var desc = r.DescribeCounter(counters[0]);
 
-                m_Times = r.FetchCounters(counters);
+                // Always run it twice the first time.
+                var times = r.FetchCounters(counters);
+                if(times.Count != m_Times.Count)
+                {
+                    m_Times = times;
+                    times = r.FetchCounters(counters);
+                }
+
+                var member_values_array = m_Times.Values.ToArray();
+                for (int t = 0; t < m_Times.Values.Count; ++t)
+                {
+                    var temp_values_array = times.Values.ToArray();
+                    for (int u = 0; u < temp_values_array[t].Count; ++u)
+                    {
+                        if (temp_values_array[t][u].value.d < member_values_array[t][u].value.d)
+                        {
+                            member_values_array[t][u].value.d = temp_values_array[t][u].value.d;
+                        }
+                    }
+                }
 
                 BeginInvoke((MethodInvoker)delegate
                 {
